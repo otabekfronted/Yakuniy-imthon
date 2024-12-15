@@ -13,7 +13,7 @@ function App() {
                     <Header></Header>
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/product/:id" element={<ProductView />} />
+                        <Route path="/coin/:id" element={<ProductView />} />
                     </Routes>
                 </Router>
             </WatchlistProvider>

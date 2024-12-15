@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Chart from "react-apexcharts";
+import { useParams } from "react-router-dom";
 
-const LineChart = () => {
+const LineChart = ({ timePeriod }) => {
+    const { id } = useParams(); // useParams orqali idni olish
     const [chartData, setChartData] = useState({
         series: [
             {
-                name: "Price (Past 1 Day)",
+                name: "Price",
                 data: [],
             },
         ],
@@ -21,21 +23,21 @@ const LineChart = () => {
                 curve: "smooth",
             },
             xaxis: {
-                categories: [], // Vaqt belgilarini API-dan to'ldiramiz
+                categories: [],
             },
             yaxis: {
                 labels: {
-                    formatter: (value) => `₹ ${value}`,
+                    formatter: (value) => `$ ${value.toFixed(2)}`,
                 },
             },
             tooltip: {
                 y: {
-                    formatter: (value) => `₹ ${value}`,
+                    formatter: (value) => `$ ${value.toFixed(2)}`,
                 },
             },
             colors: ["#00BFFF"],
             title: {
-                text: "Price (Past 1 Day) in INR",
+                text: `Price in USD (${timePeriod})`,
                 align: "left",
                 style: {
                     fontSize: "16px",
@@ -52,26 +54,35 @@ const LineChart = () => {
         },
     });
 
+    const timeMapping = {
+        "24 Hours": 1,
+        "30 Days": 30,
+        "3 Months": 90,
+        "1 Year": 365,
+    };
+
     useEffect(() => {
         const fetchChartData = async () => {
             try {
                 const response = await axios.get(
-                    "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart",
+                    `https://api.coingecko.com/api/v3/coins/${id}/market_chart`, // To'g'ri URL
                     {
                         params: {
-                            vs_currency: "inr", // Valyuta
-                            days: 1, // Oxirgi 1 kunlik ma'lumot
+                            vs_currency: "usd", // USD valyutasi uchun
+                            days: timeMapping[timePeriod],
                         },
                     }
                 );
 
-                const prices = response.data.prices; // Narxlar ro'yxati [timestamp, price]
+                const prices = response.data.prices; // Narx va vaqt [timestamp, price]
                 const times = prices.map(
-                    (price) => new Date(price[0]).toLocaleTimeString() // Timestampsni soat formatiga o'zgartirish
+                    (price) =>
+                        new Date(price[0]).toLocaleDateString() +
+                        " " +
+                        new Date(price[0]).toLocaleTimeString()
                 );
-                const priceValues = prices.map((price) => price[1]); // Narx qiymatlarini olish
+                const priceValues = prices.map((price) => price[1]);
 
-                // State-ni yangilash
                 setChartData((prevData) => ({
                     ...prevData,
                     series: [
@@ -86,6 +97,10 @@ const LineChart = () => {
                             ...prevData.options.xaxis,
                             categories: times,
                         },
+                        title: {
+                            ...prevData.options.title,
+                            text: `Price in USD (${timePeriod})`,
+                        },
                     },
                 }));
             } catch (error) {
@@ -94,7 +109,7 @@ const LineChart = () => {
         };
 
         fetchChartData();
-    }, []);
+    }, [timePeriod, id]); // ID o'zgarishini kuzatish uchun
 
     return (
         <div className="bg-[#14161A] p-6">

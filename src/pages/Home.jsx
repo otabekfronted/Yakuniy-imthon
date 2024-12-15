@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { CurrencyContext } from "../context/CurrencyContext";
 import axios from "axios";
 import Pagination from "../components/Pagination";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AiOutlineEye } from "react-icons/ai";
 import HeroCarousel from "../components/HeroCarousel";
 
@@ -10,9 +10,10 @@ const Home = () => {
     const { currency } = useContext(CurrencyContext);
     const [coins, setCoins] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const [page, setPage] = useState(1); // Sahifa raqamini saqlash uchun
+    const [page, setPage] = useState(1);
     const [params, setParams] = useSearchParams();
-    const [limit, setLimit] = useState(10); // Limitni aniqlash
+    const [limit, setLimit] = useState(10);
+    const navigate = useNavigate(); // For navigation
 
     useEffect(() => {
         const fetchCoins = async () => {
@@ -23,7 +24,7 @@ const Home = () => {
                         params: {
                             vs_currency: currency,
                             order: "gecko_desc",
-                            per_page: limit, // Limitni dinamik yuboramiz
+                            per_page: limit,
                             page: page,
                             sparkline: false,
                             price_change_percentage: "24h",
@@ -31,18 +32,23 @@ const Home = () => {
                     }
                 );
                 setCoins(response.data);
-                setParams({ page: page, currency: currency, limit: limit }); // Limitni URL parametriga qo‘shamiz
+                setParams({ page: page, currency: currency, limit: limit });
             } catch (error) {
                 console.error("Error fetching coins:", error);
             }
         };
 
         fetchCoins();
-    }, [currency, page, limit]); // Limit o'zgarsa ham qayta so‘rov qilinadi
+    }, [currency, page, limit]);
 
     const filteredCoins = coins.filter((coin) =>
         coin.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Handle row click to navigate to coin details page
+    const handleRowClick = (coinId) => {
+        navigate(`/coin/${coinId}`);
+    };
 
     return (
         <div className="bg-[#14161A]">
@@ -79,7 +85,11 @@ const Home = () => {
                     </thead>
                     <tbody>
                         {filteredCoins.map((coin) => (
-                            <tr key={coin.id}>
+                            <tr
+                                key={coin.id}
+                                className="cursor-pointer hover:bg-[#2A2B2D]"
+                                onClick={() => handleRowClick(coin.id)} // Navigate on click
+                            >
                                 <td className="flex gap-3 border-b border-[#515151] p-3">
                                     <img
                                         className="w-[50px] h-[50px]"
@@ -119,7 +129,6 @@ const Home = () => {
                                         </span>
                                     </div>
                                 </td>
-
                                 <td className="text-right border-b border-[#515151] p-2">
                                     {coin.total_volume}
                                 </td>
