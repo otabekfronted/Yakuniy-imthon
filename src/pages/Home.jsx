@@ -5,6 +5,7 @@ import Pagination from "../components/Pagination";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { AiOutlineEye } from "react-icons/ai";
 import HeroCarousel from "../components/HeroCarousel";
+import Watchlist from "../components/Watchlist"; // Import Watchlist component
 
 const Home = () => {
     const { currency } = useContext(CurrencyContext);
@@ -13,7 +14,14 @@ const Home = () => {
     const [page, setPage] = useState(1);
     const [params, setParams] = useSearchParams();
     const [limit, setLimit] = useState(10);
-    const navigate = useNavigate(); // For navigation
+    const navigate = useNavigate();
+
+    // Viewed coins state
+    const [viewedCoins, setViewedCoins] = useState(() => {
+        // Initialize from localStorage
+        const savedViewedCoins = localStorage.getItem("viewedCoins");
+        return savedViewedCoins ? JSON.parse(savedViewedCoins) : [];
+    });
 
     useEffect(() => {
         const fetchCoins = async () => {
@@ -45,8 +53,23 @@ const Home = () => {
         coin.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Handle row click to navigate to coin details page
+    // Handle row click to navigate and mark as viewed
     const handleRowClick = (coinId) => {
+        // Coinni to'liq ma'lumotlari bilan topish
+        const selectedCoin = coins.find((coin) => coin.id === coinId);
+
+        // Agar coin topilgan bo'lsa
+        if (selectedCoin) {
+            // Tangani viewedCoinsga qo'shish, agar hali mavjud bo'lmasa
+            const updatedViewedCoins = [...viewedCoins, selectedCoin];
+            setViewedCoins(updatedViewedCoins);
+            localStorage.setItem(
+                "viewedCoins",
+                JSON.stringify(updatedViewedCoins)
+            );
+        }
+
+        // Coin detallari sahifasiga yo'naltirish
         navigate(`/coin/${coinId}`);
     };
 
@@ -84,56 +107,69 @@ const Home = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredCoins.map((coin) => (
-                            <tr
-                                key={coin.id}
-                                className="cursor-pointer hover:bg-[#2A2B2D]"
-                                onClick={() => handleRowClick(coin.id)} // Navigate on click
-                            >
-                                <td className="flex gap-3 border-b border-[#515151] p-3">
-                                    <img
-                                        className="w-[50px] h-[50px]"
-                                        src={coin.image}
-                                        alt={coin.name}
-                                    />
-                                    <div className="flex flex-col">
-                                        <h2 className="text-lg font-bold">
-                                            {coin.symbol.toUpperCase()}
-                                        </h2>
-                                        <p className="text-sm text-gray-500">
-                                            {coin.name}
-                                        </p>
-                                    </div>
-                                </td>
-                                <td className="text-right border-b border-[#515151] p-2">
-                                    ${coin.current_price}
-                                </td>
-                                <td
-                                    className={`text-right border-b border-[#515151] p-2 ${
-                                        coin.price_change_percentage_24h > 0
-                                            ? "text-green-500"
-                                            : "text-red-500"
-                                    }`}
+                        {filteredCoins.map((coin) => {
+                            // "viewed" flag for this coin
+                            const isViewed = viewedCoins.some(
+                                (viewedCoin) => viewedCoin.id === coin.id
+                            );
+
+                            return (
+                                <tr
+                                    key={coin.id}
+                                    className="cursor-pointer hover:bg-[#2A2B2D]"
+                                    onClick={() => handleRowClick(coin.id)}
                                 >
-                                    <div className="flex items-center justify-end gap-4 ">
-                                        <AiOutlineEye className="text-white w-[26px] h-8" />
-                                        <span>
-                                            {coin.price_change_percentage_24h >
-                                            0
-                                                ? "+"
-                                                : ""}
-                                            {coin.price_change_percentage_24h.toFixed(
-                                                2
-                                            )}
-                                            %
-                                        </span>
-                                    </div>
-                                </td>
-                                <td className="text-right border-b border-[#515151] p-2">
-                                    {coin.total_volume}
-                                </td>
-                            </tr>
-                        ))}
+                                    <td className="flex gap-3 border-b border-[#515151] p-3">
+                                        <img
+                                            className="w-[50px] h-[50px]"
+                                            src={coin.image}
+                                            alt={coin.name}
+                                        />
+                                        <div className="flex flex-col">
+                                            <h2 className="text-lg font-bold">
+                                                {coin.symbol.toUpperCase()}
+                                            </h2>
+                                            <p className="text-sm text-gray-500">
+                                                {coin.name}
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td className="text-right border-b border-[#515151] p-2">
+                                        ${coin.current_price}
+                                    </td>
+                                    <td
+                                        className={`text-right border-b border-[#515151] p-2 ${
+                                            coin.price_change_percentage_24h > 0
+                                                ? "text-green-500"
+                                                : "text-red-500"
+                                        }`}
+                                    >
+                                        <div className="flex items-center justify-end gap-4">
+                                            <AiOutlineEye
+                                                className={`${
+                                                    isViewed
+                                                        ? "text-green-500"
+                                                        : "text-white"
+                                                } w-[26px] h-8`}
+                                            />
+                                            <span>
+                                                {coin.price_change_percentage_24h >
+                                                0
+                                                    ? "+"
+                                                    : ""}
+                                                {coin.price_change_percentage_24h.toFixed(
+                                                    2
+                                                )}
+                                                %
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="text-right border-b border-[#515151] p-2">
+                                        {coin.total_volume}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
 

@@ -4,7 +4,7 @@ import Chart from "react-apexcharts";
 import { useParams } from "react-router-dom";
 
 const LineChart = ({ timePeriod }) => {
-    const { id } = useParams(); // useParams orqali idni olish
+    const { id } = useParams();
     const [chartData, setChartData] = useState({
         series: [
             {
@@ -17,6 +17,9 @@ const LineChart = ({ timePeriod }) => {
                 type: "line",
                 zoom: {
                     enabled: false,
+                },
+                toolbar: {
+                    show: false,
                 },
             },
             stroke: {
