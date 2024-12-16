@@ -20,6 +20,13 @@ const Home = () => {
         return savedViewedCoins ? JSON.parse(savedViewedCoins) : [];
     });
 
+    const formatPrice = (price, currency) => {
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: currency.toUpperCase(),
+        }).format(price);
+    };
+
     useEffect(() => {
         const fetchCoins = async () => {
             try {
@@ -44,7 +51,7 @@ const Home = () => {
         };
 
         fetchCoins();
-    }, [currency, page, limit, setParams]);
+    }, [currency, page, limit]);
 
     const filteredCoins = coins.filter((coin) =>
         coin.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -124,7 +131,10 @@ const Home = () => {
                                         </div>
                                     </td>
                                     <td className="text-right border-b border-[#515151] p-2">
-                                        ${coin.current_price}
+                                        {formatPrice(
+                                            coin.current_price,
+                                            currency
+                                        )}
                                     </td>
                                     <td
                                         className={`text-right border-b border-[#515151] p-2 ${
