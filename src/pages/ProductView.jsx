@@ -1,10 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import LineChart from "../components/LineChart";
+import { CurrencyContext } from "../context/CurrencyContext";
+
+const currencySymbols = {
+    inr: "₹",
+    usd: "$",
+    eur: "€",
+    jpy: "¥",
+};
 
 const ProductView = () => {
     const { id } = useParams();
+    const { currency } = useContext(CurrencyContext);
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
     const [selectedTime, setSelectedTime] = useState("24 Hours");
@@ -33,6 +42,8 @@ const ProductView = () => {
         return <p className="text-gray-400">Yuklanmoqda...</p>;
     }
 
+    const currencySymbol = currencySymbols[currency] || "₹"; // Default to ₹ if no symbol found
+
     return (
         <div className="bg-[#14161A] flex flex-col lg:flex-row text-white p-6 gap-6">
             {/* Chap tomon ma'lumotlar */}
@@ -55,11 +66,18 @@ const ProductView = () => {
                         Rank: {data.market_cap_rank}
                     </p>
                     <p className="text-2xl font-bold mb-2">
-                        Current Price: ₹ {data.market_data.current_price.inr}
+                        Current Price: {currencySymbol}{" "}
+                        {currency === "inr"
+                            ? data.market_data.current_price.inr
+                            : data.market_data.current_price[currency]}
                     </p>
                     <p className="text-2xl font-bold">
-                        Market Cap: ₹{" "}
-                        {data.market_data.market_cap.inr.toLocaleString()}
+                        Market Cap: {currencySymbol}{" "}
+                        {currency === "inr"
+                            ? data.market_data.market_cap.inr.toLocaleString()
+                            : data.market_data.market_cap[
+                                  currency
+                              ].toLocaleString()}
                     </p>
                 </div>
             </div>
@@ -67,7 +85,8 @@ const ProductView = () => {
             {/* LineChart qismi */}
             <div className="flex-grow bg-[#1C1E22] rounded-lg p-4 shadow-md">
                 <div className="h-[400px]">
-                    <LineChart timePeriod={selectedTime} />
+                    <LineChart timePeriod={selectedTime} currency={currency} />{" "}
+                    {/* Pass currency to LineChart */}
                 </div>
                 {/* Tugmalar qismi */}
                 <div className="flex justify-around mt-6">

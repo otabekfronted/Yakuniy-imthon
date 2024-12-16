@@ -5,7 +5,6 @@ import Pagination from "../components/Pagination";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { AiOutlineEye } from "react-icons/ai";
 import HeroCarousel from "../components/HeroCarousel";
-import Watchlist from "../components/Watchlist"; // Import Watchlist component
 
 const Home = () => {
     const { currency } = useContext(CurrencyContext);
@@ -16,9 +15,7 @@ const Home = () => {
     const [limit, setLimit] = useState(10);
     const navigate = useNavigate();
 
-    // Viewed coins state
     const [viewedCoins, setViewedCoins] = useState(() => {
-        // Initialize from localStorage
         const savedViewedCoins = localStorage.getItem("viewedCoins");
         return savedViewedCoins ? JSON.parse(savedViewedCoins) : [];
     });
@@ -30,7 +27,7 @@ const Home = () => {
                     `https://api.coingecko.com/api/v3/coins/markets`,
                     {
                         params: {
-                            vs_currency: currency,
+                            vs_currency: currency, // Dinamik valyuta
                             order: "gecko_desc",
                             per_page: limit,
                             page: page,
@@ -53,14 +50,9 @@ const Home = () => {
         coin.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Handle row click to navigate and mark as viewed
     const handleRowClick = (coinId) => {
-        // Coinni to'liq ma'lumotlari bilan topish
         const selectedCoin = coins.find((coin) => coin.id === coinId);
-
-        // Agar coin topilgan bo'lsa
         if (selectedCoin) {
-            // Tangani viewedCoinsga qo'shish, agar hali mavjud bo'lmasa
             const updatedViewedCoins = [...viewedCoins, selectedCoin];
             setViewedCoins(updatedViewedCoins);
             localStorage.setItem(
@@ -68,8 +60,6 @@ const Home = () => {
                 JSON.stringify(updatedViewedCoins)
             );
         }
-
-        // Coin detallari sahifasiga yo'naltirish
         navigate(`/coin/${coinId}`);
     };
 
@@ -108,7 +98,6 @@ const Home = () => {
                     </thead>
                     <tbody>
                         {filteredCoins.map((coin) => {
-                            // "viewed" flag for this coin
                             const isViewed = viewedCoins.some(
                                 (viewedCoin) => viewedCoin.id === coin.id
                             );
@@ -173,7 +162,11 @@ const Home = () => {
                     </tbody>
                 </table>
 
-                <Pagination currentPage={page} setPage={setPage} />
+                <Pagination
+                    activeClassName="bg-[#87CEEB] text-[#000] py-2 px-5 rounded-full"
+                    currentPage={page}
+                    setPage={setPage}
+                />
             </div>
         </div>
     );

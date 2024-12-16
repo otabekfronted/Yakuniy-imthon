@@ -1,13 +1,13 @@
 import { useContext, useState } from "react";
 import { CurrencyContext } from "../context/CurrencyContext";
-import Watchlist from "./Watchlist"; // Import the Watchlist component
+import Watchlist from "./Watchlist";
 
 function Header() {
     const { currency, setCurrency } = useContext(CurrencyContext);
-    const [isWatchlistOpen, setIsWatchlistOpen] = useState(false); // State to toggle watchlist
+    const [isWatchlistOpen, setIsWatchlistOpen] = useState(false);
 
     const toggleWatchlist = () => {
-        setIsWatchlistOpen(!isWatchlistOpen); // Toggle the visibility of the watchlist
+        setIsWatchlistOpen((prev) => !prev);
     };
 
     return (
@@ -22,13 +22,13 @@ function Header() {
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
                     >
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="JPY">JPY</option>
+                        <option value="usd">USD</option>
+                        <option value="eur">EUR</option>
+                        <option value="jpy">JPY</option>
                     </select>
                     <button
                         className="bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
-                        onClick={toggleWatchlist} // Toggle watchlist
+                        onClick={toggleWatchlist}
                     >
                         Watch List
                     </button>

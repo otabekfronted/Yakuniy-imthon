@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { CurrencyContext } from "../context/CurrencyContext";
 import axios from "axios";
-import Pagination from "../components/Pagination";
 
 const Home = () => {
     const { currency } = useContext(CurrencyContext);
