@@ -27,7 +27,7 @@ const Home = () => {
                     `https://api.coingecko.com/api/v3/coins/markets`,
                     {
                         params: {
-                            vs_currency: currency, // Dinamik valyuta
+                            vs_currency: currency,
                             order: "gecko_desc",
                             per_page: limit,
                             page: page,
@@ -44,7 +44,7 @@ const Home = () => {
         };
 
         fetchCoins();
-    }, [currency, page, limit]);
+    }, [currency, page, limit, setParams]);
 
     const filteredCoins = coins.filter((coin) =>
         coin.name.toLowerCase().includes(searchTerm.toLowerCase())
